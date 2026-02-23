@@ -84,6 +84,7 @@ async function runSelection(): Promise<void> {
     // executeCode() does not affect the cell execution count or history.
     const tokenSource = new vscode.CancellationTokenSource();
     const outputs: vscode.NotebookCellOutput[] = [];
+    let caughtError: unknown;
 
     try {
         for await (const out of kernel.executeCode(code, tokenSource.token)) {
@@ -95,10 +96,32 @@ async function runSelection(): Promise<void> {
             );
         }
     } catch (err) {
-        vscode.window.showErrorMessage(`Notebook: Run Selection — kernel error: ${err}`);
-        return;
+        caughtError = err;
     } finally {
         tokenSource.dispose();
+    }
+
+    if (caughtError !== undefined) {
+        const showAsNotification = vscode.workspace
+            .getConfiguration('nbRunSelection')
+            .get<boolean>('showExceptionsAsNotification', true);
+
+        if (showAsNotification) {
+            vscode.window.showErrorMessage(`Notebook: Run Selection — kernel error: ${caughtError}`);
+            return;
+        }
+
+        if (outputs.length === 0) {
+            // No output was yielded before the throw — pure infrastructure error.
+            // Render it as a cell output so there is something visible.
+            outputs.push(new vscode.NotebookCellOutput([
+                vscode.NotebookCellOutputItem.error(
+                    caughtError instanceof Error ? caughtError : new Error(String(caughtError))
+                )
+            ]));
+        }
+        // If outputs is non-empty the Python traceback was already yielded as an
+        // output by executeCode before it threw; the JS-level throw is redundant.
     }
 
     if (outputs.length === 0) {

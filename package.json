@@ -24,7 +24,17 @@
         "key": "shift+enter",
         "when": "notebookCellEditorFocused && editorHasSelection"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Notebook Run Selection",
+      "properties": {
+        "nbRunSelection.showExceptionsAsNotification": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show kernel exceptions as a notification popup. Disable to render them as cell output instead."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
