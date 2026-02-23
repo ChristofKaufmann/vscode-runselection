@@ -10,6 +10,7 @@
   "categories": ["Notebooks"],
   "activationEvents": [],
   "main": "./out/extension.js",
+  "extensionDependencies": ["ms-toolsai.jupyter"],
   "contributes": {
     "commands": [
       {
@@ -23,17 +24,7 @@
         "key": "shift+enter",
         "when": "notebookCellEditorFocused && editorHasSelection"
       }
-    ],
-    "configuration": {
-      "title": "Notebook Run Selection",
-      "properties": {
-        "nbRunSelection.deleteTempCellAfterExecution": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically delete the temporary cell after execution completes."
-        }
-      }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

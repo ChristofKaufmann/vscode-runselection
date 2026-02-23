@@ -12,21 +12,17 @@ When exploring data or debugging, running an entire notebook cell is often too c
 2. Click into a code cell and select the text you want to run.
 3. Press **Shift+Enter**.
 
-The selected code is executed in the existing kernel. The output appears on the original cell.
+The selected code is executed in the existing kernel. The output replaces the current output of the active cell.
 
 If nothing is selected, the current line is used.
 
 ## How it works
 
-1. A temporary code cell is inserted immediately after the active cell.
-2. The selection (or current line) is placed in that cell and executed.
-3. Once the kernel signals completion, the cell's outputs are transferred to the original cell and the temporary cell is deleted.
+The extension uses the [Jupyter extension API](https://github.com/microsoft/vscode-jupyter) to execute the selection directly in the running kernel. The execution does not affect the cell's execution counter or the notebook's execution history.
 
-## Configuration
+## Requirements
 
-| Setting | Default | Description |
-|---|---|---|
-| `nbRunSelection.deleteTempCellAfterExecution` | `true` | Delete the temporary cell after execution. Disable to keep it visible. |
+The [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) (`ms-toolsai.jupyter`) must be installed and a kernel must be running for the notebook.
 
 ## Development
 

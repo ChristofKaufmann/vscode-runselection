@@ -1,5 +1,33 @@
 import * as vscode from 'vscode';
 
+// ---------- Minimal type surface of the ms-toolsai.jupyter public API ----------
+// Based on https://github.com/microsoft/vscode-jupyter/blob/main/src/api.d.ts
+
+interface JupyterOutputItem {
+    mime: string;
+    data: Uint8Array;
+}
+
+interface JupyterOutput {
+    items: JupyterOutputItem[];
+    metadata?: { [key: string]: unknown };
+}
+
+interface JupyterKernel {
+    readonly language: string;
+    executeCode(code: string, token: vscode.CancellationToken): AsyncIterable<JupyterOutput>;
+}
+
+interface JupyterKernels {
+    getKernel(uri: vscode.Uri): Thenable<JupyterKernel | undefined>;
+}
+
+interface JupyterExtensionAPI {
+    readonly kernels: JupyterKernels;
+}
+
+// -------------------------------------------------------------------------------
+
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('nb-run-selection.runSelection', runSelection)
@@ -7,10 +35,9 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /**
- * Inserts a new code cell containing the selected text (or the current line when
- * nothing is selected) right after the active cell, executes it, then — if
- * `nbRunSelection.deleteTempCellAfterExecution` is true — transfers its outputs
- * to the original cell and removes the temporary cell.
+ * Executes the selected text (or current line) directly in the notebook's
+ * kernel via the Jupyter extension API, without inserting any temporary cell.
+ * The resulting outputs replace the current outputs of the active cell.
  */
 async function runSelection(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
@@ -44,134 +71,76 @@ async function runSelection(): Promise<void> {
         return;
     }
 
-    const insertIndex = currentCell.index + 1;
-
-    // Insert a temporary cell right after the active cell.
-    const wsEdit = new vscode.WorkspaceEdit();
-    wsEdit.set(notebook.uri, [
-        vscode.NotebookEdit.insertCells(insertIndex, [
-            new vscode.NotebookCellData(
-                vscode.NotebookCellKind.Code,
-                code,
-                currentCell.document.languageId
-            )
-        ])
-    ]);
-    await vscode.workspace.applyEdit(wsEdit);
-
-    // Focus the new cell so notebook.cell.execute targets it.
-    await vscode.window.showNotebookDocument(notebook, {
-        selections: [new vscode.NotebookRange(insertIndex, insertIndex + 1)],
-        preserveFocus: false,
-    });
-
-    await vscode.commands.executeCommand('notebook.cell.execute');
-
-    // Capture the live cell object by reference so we can track it even if
-    // surrounding cells are inserted/deleted while we wait.
-    const tempCell = notebook.cellAt(insertIndex);
-
-    const config = vscode.workspace.getConfiguration('nbRunSelection');
-    if (config.get<boolean>('deleteTempCellAfterExecution')) {
-        await deleteCellAfterExecution(notebook, currentCell, tempCell);
-    }
-}
-
-/**
- * Waits for `tempCell` to finish executing, appends its outputs to
- * `originalCell`, then deletes `tempCell` — all in one atomic workspace edit.
- */
-async function deleteCellAfterExecution(
-    notebook: vscode.NotebookDocument,
-    originalCell: vscode.NotebookCell,
-    tempCell: vscode.NotebookCell
-): Promise<void> {
-    // Fast path: kernel finished before we attached the listener.
-    if (tempCell.executionSummary !== undefined) {
-        await transferOutputsAndDelete(notebook, originalCell, tempCell);
+    // Obtain the kernel that is already running for this notebook.
+    const kernel = await getJupyterKernel(notebook.uri);
+    if (!kernel) {
+        vscode.window.showWarningMessage(
+            'Notebook: Run Selection — no kernel is running for this notebook.'
+        );
         return;
     }
 
-    // onDidChangeNotebookDocument fires a cellChanges entry with executionSummary
-    // set the moment the kernel marks the cell as done. No timeout — we wait as
-    // long as the kernel needs.
-    await new Promise<void>(resolve => {
-        const disposable = vscode.workspace.onDidChangeNotebookDocument(event => {
-            if (event.notebook !== notebook) {
-                return;
-            }
-            for (const change of event.cellChanges) {
-                if (change.cell === tempCell && change.executionSummary !== undefined) {
-                    disposable.dispose();
-                    resolve();
-                    return;
-                }
-            }
-        });
-    });
+    // Execute the code fragment directly in the kernel.
+    // executeCode() does not affect the cell execution count or history.
+    const tokenSource = new vscode.CancellationTokenSource();
+    const outputs: vscode.NotebookCellOutput[] = [];
 
-    await transferOutputsAndDelete(notebook, originalCell, tempCell);
-}
-
-/**
- * Replaces the outputs of `originalCell` with those from `tempCell`, then
- * deletes `tempCell` — both in a single workspace edit.
- *
- * `NotebookEdit` has no `updateCellOutputs` in the stable API, so we use
- * `replaceCells` with a reconstructed `NotebookCellData` that carries the new
- * outputs. The cell content, language, and metadata are preserved.
- */
-async function transferOutputsAndDelete(
-    notebook: vscode.NotebookDocument,
-    originalCell: vscode.NotebookCell,
-    tempCell: vscode.NotebookCell
-): Promise<void> {
-    // Re-resolve indices at apply time — insertions/deletions elsewhere may have
-    // shifted them since we captured the cell references.
-    const originalIndex = notebook.getCells().indexOf(originalCell);
-    const tempIndex = notebook.getCells().indexOf(tempCell);
-
-    if (tempIndex === -1) {
-        return; // temp cell already gone
+    try {
+        for await (const out of kernel.executeCode(code, tokenSource.token)) {
+            outputs.push(
+                new vscode.NotebookCellOutput(
+                    out.items.map(item => new vscode.NotebookCellOutputItem(item.data, item.mime)),
+                    out.metadata
+                )
+            );
+        }
+    } catch (err) {
+        vscode.window.showErrorMessage(`Notebook: Run Selection — kernel error: ${err}`);
+        return;
+    } finally {
+        tokenSource.dispose();
     }
 
-    // Build new NotebookCellOutput instances so they are independent of the
-    // cell we are about to delete.
-    const transferredOutputs = tempCell.outputs.map(output =>
-        new vscode.NotebookCellOutput(
-            output.items.map(item => new vscode.NotebookCellOutputItem(item.data, item.mime)),
-            output.metadata
-        )
+    if (outputs.length === 0) {
+        return;
+    }
+
+    // Replace the active cell's outputs with the selection's results.
+    // We use replaceCells (the only stable API for setting outputs) with the
+    // same cell content so only the outputs change visually.
+    const cellIndex = notebook.getCells().indexOf(currentCell);
+    if (cellIndex === -1) {
+        return;
+    }
+
+    const replacement = new vscode.NotebookCellData(
+        currentCell.kind,
+        currentCell.document.getText(),
+        currentCell.document.languageId
     );
-
-    // Always delete the temp cell; also replace the original cell's outputs
-    // when there is something to show.
-    const notebookEdits: vscode.NotebookEdit[] = [
-        vscode.NotebookEdit.deleteCells(new vscode.NotebookRange(tempIndex, tempIndex + 1))
-    ];
-
-    if (originalIndex !== -1 && transferredOutputs.length > 0) {
-        const replacement = new vscode.NotebookCellData(
-            originalCell.kind,
-            originalCell.document.getText(),
-            originalCell.document.languageId
-        );
-        replacement.outputs = transferredOutputs;
-        replacement.metadata = { ...originalCell.metadata };
-
-        // Prepend so the replacement runs before the delete; a 1-for-1
-        // replaceCells does not shift any indices.
-        notebookEdits.unshift(
-            vscode.NotebookEdit.replaceCells(
-                new vscode.NotebookRange(originalIndex, originalIndex + 1),
-                [replacement]
-            )
-        );
-    }
+    replacement.outputs = outputs;
+    replacement.metadata = { ...currentCell.metadata };
 
     const edit = new vscode.WorkspaceEdit();
-    edit.set(notebook.uri, notebookEdits);
+    edit.set(notebook.uri, [
+        vscode.NotebookEdit.replaceCells(
+            new vscode.NotebookRange(cellIndex, cellIndex + 1),
+            [replacement]
+        )
+    ]);
     await vscode.workspace.applyEdit(edit);
+}
+
+async function getJupyterKernel(notebookUri: vscode.Uri): Promise<JupyterKernel | undefined> {
+    const ext = vscode.extensions.getExtension<JupyterExtensionAPI>('ms-toolsai.jupyter');
+    if (!ext) {
+        vscode.window.showErrorMessage(
+            'Notebook: Run Selection — the Jupyter extension (ms-toolsai.jupyter) is not installed.'
+        );
+        return undefined;
+    }
+    const api = await ext.activate();
+    return api.kernels.getKernel(notebookUri);
 }
 
 export function deactivate() {}
