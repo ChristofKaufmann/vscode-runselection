@@ -1,0 +1,48 @@
+{
+  "name": "nb-run-selection",
+  "displayName": "Notebook: Run Selection",
+  "description": "Run the selected text (or current line) in a new notebook cell — like Jupyter's Run Selection in Interactive Window, but for notebooks.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "license": "MIT",
+  "categories": ["Notebooks"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "nb-run-selection.runSelection",
+        "title": "Notebook: Run Selection"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "nb-run-selection.runSelection",
+        "key": "shift+enter",
+        "when": "notebookCellEditorFocused && editorHasSelection"
+      }
+    ],
+    "configuration": {
+      "title": "Notebook Run Selection",
+      "properties": {
+        "nbRunSelection.deleteTempCellAfterExecution": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically delete the temporary cell after execution completes."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "20.x",
+    "typescript": "^5.4.0"
+  }
+}
