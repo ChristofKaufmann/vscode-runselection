@@ -24,6 +24,12 @@ The extension uses the [Jupyter extension API](https://github.com/microsoft/vsco
 
 The [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) (`ms-toolsai.jupyter`) must be installed and a kernel must be running for the notebook.
 
+## Configuration
+
+| Setting                                       | Type    | Default | Description                                                                                           |
+| --------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `nbRunSelection.showExceptionsAsNotification` | boolean | `true`  | Show kernel exceptions as a notification popup. Set to `false` to render them as cell output instead. |
+
 ## Development
 
 ```bash
