@@ -97,7 +97,7 @@ async function runSelection(): Promise<void> {
     } catch (err) {
         const showAsNotification = vscode.workspace
             .getConfiguration('nbRunSelection')
-            .get<boolean>('showExceptionsAsNotification', true);
+            .get<boolean>('showExceptionsAsNotification', false);
 
         if (showAsNotification || outputs.length === 0) {
             vscode.window.showErrorMessage(`Notebook: Run Selection — kernel error: ${err}`);

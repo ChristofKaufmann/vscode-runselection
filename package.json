@@ -30,7 +30,7 @@
       "properties": {
         "nbRunSelection.showExceptionsAsNotification": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Show kernel exceptions as a notification popup. Disable to render them as cell output instead."
         }
       }

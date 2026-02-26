@@ -28,7 +28,7 @@ The [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-t
 
 | Setting                                       | Type    | Default | Description                                                                                           |
 | --------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------- |
-| `nbRunSelection.showExceptionsAsNotification` | boolean | `true`  | Show kernel exceptions as a notification popup. Set to `false` to render them as cell output instead. |
+| `nbRunSelection.showExceptionsAsNotification` | boolean | `false` | Show kernel exceptions as a notification popup. Set to `false` to render them as cell output instead. |
 
 ## Development
 
