@@ -114,11 +114,6 @@ async function runSelection(): Promise<void> {
     // Replace the active cell's outputs with the selection's results.
     // We use replaceCells (the only stable API for setting outputs) with the
     // same cell content so only the outputs change visually.
-    const cellIndex = notebook.getCells().indexOf(currentCell);
-    if (cellIndex === -1) {
-        return;
-    }
-
     const replacement = new vscode.NotebookCellData(
         currentCell.kind,
         currentCell.document.getText(),
@@ -130,7 +125,7 @@ async function runSelection(): Promise<void> {
     const edit = new vscode.WorkspaceEdit();
     edit.set(notebook.uri, [
         vscode.NotebookEdit.replaceCells(
-            new vscode.NotebookRange(cellIndex, cellIndex + 1),
+            new vscode.NotebookRange(currentCell.index, currentCell.index + 1),
             [replacement]
         )
     ]);
