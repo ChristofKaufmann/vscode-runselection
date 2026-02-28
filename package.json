@@ -2,6 +2,8 @@
   "name": "nb-run-selection",
   "displayName": "Notebook: Run Selection",
   "description": "Run the selected text (or current line) in a new notebook cell — like Jupyter's Run Selection in Interactive Window, but for notebooks.",
+  "author": "Christof Kaufmann",
+  "publisher": "ChristofKaufmann",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
@@ -39,11 +41,15 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && tsc -p tsconfig.test.json && vscode-test"
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",
     "@types/node": "20.x",
+    "@types/mocha": "^10.0.6",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.0",
     "typescript": "^5.4.0"
   }
 }
