@@ -8,6 +8,7 @@
   "engines": {
     "vscode": "^1.80.0"
   },
+  "icon": "icon/icon.png",
   "license": "MIT",
   "categories": ["Notebooks"],
   "activationEvents": [],
