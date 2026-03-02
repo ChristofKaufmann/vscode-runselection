@@ -1,6 +1,6 @@
 # Notebook: Run Selection
 
-Run selected text in a notebook cell — like **Jupyter: Run Selection in Interactive Window**, but for notebooks. Useful when running an entire cell is too coarse and you just want to execute a sub-expression or a few lines.
+**Notebook: Run Selection/Line** runs selected text (or the current line) in a notebook cell — like **Jupyter: Run Selection/Line in Interactive Window**, but for notebooks. Useful when running an entire cell is too coarse and you just want to execute a sub-expression or a few lines.
 
 ## Usage
 

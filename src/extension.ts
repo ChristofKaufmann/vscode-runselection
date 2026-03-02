@@ -30,7 +30,7 @@ interface JupyterExtensionAPI {
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('nb-run-selection.runSelection', runSelection)
+        vscode.commands.registerCommand('nb-run-selection.runSelectionOrLine', runSelection)
     );
 }
 

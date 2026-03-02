@@ -116,7 +116,7 @@ suite('nb-run-selection', () => {
         // VS Code activates the extension before running any contributed command,
         // so after this resolves the command is registered for the rest of the suite.
         // The call will fail (no active notebook) — that's fine, we ignore the error.
-        await vscode.commands.executeCommand('nb-run-selection.runSelection').then(() => {}, () => {});
+        await vscode.commands.executeCommand('nb-run-selection.runSelectionOrLine').then(() => {}, () => {});
     });
 
     teardown(() => vscode.commands.executeCommand('workbench.action.closeAllEditors'));
@@ -124,7 +124,7 @@ suite('nb-run-selection', () => {
     // -----------------------------------------------------------------------
     test('command is registered', async () => {
         const cmds = await vscode.commands.getCommands();
-        assert.ok(cmds.includes('nb-run-selection.runSelection'));
+        assert.ok(cmds.includes('nb-run-selection.runSelectionOrLine'));
     });
 
     // -----------------------------------------------------------------------
@@ -133,7 +133,7 @@ suite('nb-run-selection', () => {
         try {
             const { notebook } = await openNotebook('x + 1');
 
-            await vscode.commands.executeCommand('nb-run-selection.runSelection');
+            await vscode.commands.executeCommand('nb-run-selection.runSelectionOrLine');
 
             const cell = notebook.cellAt(0);
             assert.strictEqual(cell.outputs.length, 1, 'expected one output');
@@ -155,7 +155,7 @@ suite('nb-run-selection', () => {
             const firstLineLen = cellEditor.document.lineAt(0).text.length;
             cellEditor.selection = new vscode.Selection(0, 0, 0, firstLineLen);
 
-            await vscode.commands.executeCommand('nb-run-selection.runSelection');
+            await vscode.commands.executeCommand('nb-run-selection.runSelectionOrLine');
 
             assert.strictEqual(notebook.cellAt(0).outputs.length, 1);
         } finally {
@@ -169,7 +169,7 @@ suite('nb-run-selection', () => {
         try {
             const { notebook } = await openNotebook('   ');
 
-            await vscode.commands.executeCommand('nb-run-selection.runSelection');
+            await vscode.commands.executeCommand('nb-run-selection.runSelectionOrLine');
 
             assert.strictEqual(notebook.cellAt(0).outputs.length, 0, 'expected no output');
         } finally {
@@ -185,7 +185,7 @@ suite('nb-run-selection', () => {
 
             // runSelection shows a warning notification; it must not throw.
             await assert.doesNotReject(
-                Promise.resolve(vscode.commands.executeCommand('nb-run-selection.runSelection'))
+                Promise.resolve(vscode.commands.executeCommand('nb-run-selection.runSelectionOrLine'))
             );
         } finally {
             restore();
@@ -218,7 +218,7 @@ suite('nb-run-selection', () => {
         try {
             const { notebook } = await openNotebook('1 / 0');
 
-            await vscode.commands.executeCommand('nb-run-selection.runSelection');
+            await vscode.commands.executeCommand('nb-run-selection.runSelectionOrLine');
 
             // The error output yielded before the throw should appear in the cell.
             assert.strictEqual(notebook.cellAt(0).outputs.length, 1);

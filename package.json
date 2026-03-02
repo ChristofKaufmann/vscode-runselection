@@ -17,13 +17,13 @@
   "contributes": {
     "commands": [
       {
-        "command": "nb-run-selection.runSelection",
-        "title": "Notebook: Run Selection"
+        "command": "nb-run-selection.runSelectionOrLine",
+        "title": "Notebook: Run Selection/Line"
       }
     ],
     "keybindings": [
       {
-        "command": "nb-run-selection.runSelection",
+        "command": "nb-run-selection.runSelectionOrLine",
         "key": "shift+enter",
         "when": "notebookCellEditorFocused && editorHasSelection"
       }
