@@ -38,3 +38,8 @@ jobs:
         run: npx ovsx publish extension.vsix --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: extension.vsix
+          generate_release_notes: false
