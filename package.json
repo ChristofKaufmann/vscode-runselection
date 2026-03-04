@@ -10,6 +10,10 @@
   },
   "icon": "icon/icon.png",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChristofKaufmann/vscode-runselection"
+  },
   "categories": ["Notebooks"],
   "activationEvents": [],
   "main": "./out/extension.js",
@@ -47,10 +51,12 @@
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",
-    "@types/node": "20.x",
+    "@types/node": "24.x",
     "@types/mocha": "^10.0.6",
-    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-cli": "0.x",
     "@vscode/test-electron": "^2.4.0",
+    "@vscode/vsce": "^3.0.0",
+    "ovsx": "^0.10.0",
     "typescript": "^5.4.0"
   }
 }
