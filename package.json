@@ -1,10 +1,10 @@
 {
   "name": "nb-run-selection",
   "displayName": "Notebook: Run Selection",
-  "description": "Run the selected text (or current line) in a new notebook cell — like Jupyter's Run Selection in Interactive Window, but for notebooks.",
+  "description": "Execute selected code directly in a notebook cell, like \"Jupyter: Run Selection/Line in Interactive Window\" but for notebooks.",
   "author": "Christof Kaufmann",
   "publisher": "ChristofKaufmann",
-  "version": "0.0.2",
+  "version": "0.0.3-dev",
   "engines": {
     "vscode": "^1.80.0"
   },

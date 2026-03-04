@@ -1,13 +1,13 @@
 # Notebook: Run Selection
 
-**Notebook: Run Selection/Line** runs selected text (or the current line) in a notebook cell — like **Jupyter: Run Selection/Line in Interactive Window**, but for notebooks. Useful when running an entire cell is too coarse and you just want to execute a sub-expression or a few lines.
+**Notebook: Run Selection/Line** runs selected code (or the current line) in a notebook cell — like **Jupyter: Run Selection/Line in Interactive Window**, but for notebooks. Useful when running an entire cell is too coarse and you just want to execute a sub-expression or a few lines.
 
 ## Usage
 
 ![Selecting code in a notebook cell and pressing Shift+Enter executes the selected code](images/demo.gif)
 
 1. Open a Jupyter notebook (`.ipynb`).
-2. Click into a code cell and select the text you want to run.
+2. Click into a code cell and select the code you want to run.
 3. Press **Shift+Enter**. You need to grant kernel access once.
 
 The selected code is executed in the *existing* kernel. The output replaces the current output of the active cell.
