@@ -1,18 +1,24 @@
 # Test infrastructure
 .vscode-test/**
 .vscode-test.mjs
-test/**
 out/test/**
 out/src/**
+test/**
 tsconfig.test.json
 
-# Manual testing notebooks
+# Manual testing notebooks (local only)
 manual-testing/**
 
 # CI/CD
 .github/**
 
 # Misc dev files
+.vscode/**
 .gitignore
 *.vsix
+CONTRIBUTING.md
+icon/icon.md
+images/**
 node_modules/**
+src/**
+tsconfig.json
