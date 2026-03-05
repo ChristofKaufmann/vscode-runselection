@@ -8,11 +8,22 @@
 
 1. Open a Jupyter notebook (`.ipynb`).
 2. Click into a code cell and select the code you want to run.
-3. Press **Shift+Enter**. You need to grant kernel access once.
+3. Press **Shift+Enter** (if the keybinding does not work, see below). You need to grant kernel access once.
 
 The selected code is executed in the *existing* kernel. The output replaces the current output of the active cell.
 
 If nothing is selected and you execute the command using the command palette, the current line is used, but the keybinding **Shift+Enter** is only active with a selection.
+
+> [!IMPORTANT]
+> The command **Notebook: Execute Cell and Select Below** may take priority over Shift+Enter. User keybindings have an even higher priority, so add this to the list `[...]` in your keyboard shortcuts file `keybindings.json`:
+>
+> ```json
+>     {
+>         "key": "shift+enter",
+>         "command": "nb-run-selection.runSelectionOrLine",
+>         "when": "editorHasSelection && notebookCellEditorFocused && !interactiveEditorFocused"
+>     },
+> ```
 
 ## Configuration
 
@@ -26,4 +37,9 @@ If nothing is selected and you execute the command using the command palette, th
 
 ## Original Issue
 
-This extension serves as a workaround for issue [microsoft/vscode#200625](https://github.com/microsoft/vscode/issues/200625). There is one difference: This extension cannot start a kernel, currently.
+This extension serves as a workaround for issue [microsoft/vscode#200625](https://github.com/microsoft/vscode/issues/200625).
+
+Known issues:
+
+- Currently, this extension cannot start a kernel.
+- The keybinding is conflicting with **Notebook: Execute Cell and Select Below**, which should only be triggered if there is no selection.
