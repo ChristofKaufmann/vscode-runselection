@@ -4,7 +4,7 @@
   "description": "Execute selected code directly in a notebook cell, like \"Jupyter: Run Selection/Line in Interactive Window\" but for notebooks.",
   "author": "Christof Kaufmann",
   "publisher": "ChristofKaufmann",
-  "version": "0.0.5-dev",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.80.0"
   },
